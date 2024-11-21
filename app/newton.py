@@ -14,7 +14,7 @@ def fp(x):
     return np.array([[np.cos(x[0]), 1],
                      [1, -np.sin(x[1])]])
 
-def visualize_lines(points, residuals, etas, filename='test.png'):
+def visualize_lines(points, residuals, eta, filename='test.png'):
     """
     Visualizes a list of 2D points [x, y] by connecting successive points with dotted lines,
     coloring points orange except the last one, which is blue, and annotating each point with its order.
@@ -41,8 +41,8 @@ def visualize_lines(points, residuals, etas, filename='test.png'):
 
     # Forcing terms comparison
     plt.subplot(1, 3, 2)
-    plt.plot(etas, marker='o', label='Dynamic eta')
-    # plt.plot(range(len(etas_fixed)), etas_fixed, 'r--', label='Fixed eta (0.5)')
+    plt.plot(eta, marker='o', label='Dynamic eta')
+    # plt.plot(range(len(eta_fixed)), eta_fixed, 'r--', label='Fixed eta (0.5)')
     plt.xlabel('Iteration')
     plt.ylabel('Forcing term (eta)')
     plt.title('Forcing Terms Comparison')
@@ -90,34 +90,38 @@ def visualize_lines(points, residuals, etas, filename='test.png'):
     # # Display the plot
     # plt.savefig(filename)
 
-def inexact_newton(x0, tol=1e-25, max_iter=100, eta_max = 0.7):
+def inexact_newton(x0, eta='fast', tol=1e-25, max_iter=100, eta_max = 0.7):
     """Inexact Newton using GMRES for step size"""
     x = [x0]
     residuals = []
     s = []
-    etas = [eta_max]
+    if eta=='slow':
+        eta = [eta_max/(n+1) for n in range(max_iter)]
+    else:
+        eta = [eta_max / (2**n) for n in range(max_iter)]
+    # eta = [eta_max]
     # eta_k = eta_max
 
     for k in range(max_iter):
         # Approx solution to (1.2)
         # norm(b - A @ x) <= max(rtol*norm(b), atol)
-        s_k = gmres(fp(x[-1]), -f(x[-1]), rtol=etas[-1])
+        s_k = gmres(fp(x[-1]), -f(x[-1]), rtol=eta[k])
         residuals.append(np.linalg.norm(np.matmul(fp(x[-1]),s_k[0]) + f(x[-1])))
         # print(s_k[0])
         s.append(s_k[0])
         # Generate next x_k
         x.append(x[-1] + s_k[0])
         # Generate next eta using eta_{k-1} / 2
-        etas.append(etas[-1] / 2)
-        if etas[-1] < tol:
+        if eta[k] < tol:
+            eta = eta[:k]
             break
             
     print(f'F: {f(x)}')
     print(f'x: {x}')
     # print(f's: {s}')
     # print(f'r: {residuals}')
-    print(f'etas: {etas}')
-    return x, residuals, etas
+    print(f'eta: {eta}')
+    return x, residuals, eta
 
 
     # x = [1.,-2.]
@@ -133,6 +137,6 @@ def inexact_newton(x0, tol=1e-25, max_iter=100, eta_max = 0.7):
     
 
 if __name__ == "__main__":
-    x, residuals, etas = inexact_newton(np.array([0,0]),tol=1e-15, max_iter=100, eta_max = 0.7)
-    visualize_lines(x, residuals, etas, filename='test.png')
+    x, residuals, eta = inexact_newton(np.array([1,1]), eta='fast', tol=1e-5, max_iter=100, eta_max = 0.7)
+    visualize_lines(x, residuals, eta, filename='main_example.png')
 
