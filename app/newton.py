@@ -90,14 +90,12 @@ def visualize_lines(points, residuals, eta, filename='test.png'):
     # # Display the plot
     # plt.savefig(filename)
 
-def inexact_newton(x0, eta='fast', tol=1e-25, max_iter=100, eta_max = 0.7):
+def inexact_newton(x0, eta=None, tol=1e-25, max_iter=100, eta_max = 0.7):
     """Inexact Newton using GMRES for step size"""
     x = [x0]
     residuals = []
     s = []
-    if eta=='slow':
-        eta = [eta_max/(n+1) for n in range(max_iter)]
-    else:
+    if eta==None:
         eta = [eta_max / (2**n) for n in range(max_iter)]
     # eta = [eta_max]
     # eta_k = eta_max
@@ -137,6 +135,12 @@ def inexact_newton(x0, eta='fast', tol=1e-25, max_iter=100, eta_max = 0.7):
     
 
 if __name__ == "__main__":
-    x, residuals, eta = inexact_newton(np.array([1,1]), eta='fast', tol=1e-5, max_iter=100, eta_max = 0.7)
+    # size of eta for now
+    tol = 1e-15
+    max_iter = 100
+    max_eta = 0.9
+    eta = [eta_max / (2**n) for n in range(max_iter)]
+    eta_slow = [eta_max/(n+1) for n in range(max_iter)]
+    x, residuals, eta = inexact_newton(np.array([1,1]), eta=eta, tol=tol, max_iter=max_iter, eta_max = eta_max)
     visualize_lines(x, residuals, eta, filename='main_example.png')
 
