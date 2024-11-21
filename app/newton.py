@@ -55,7 +55,7 @@ def visualize_lines(points, residuals, etas, filename='test.png'):
     # x_vals_fixed = np.array(x_vals_fixed)
     plt.plot(x_coords, y_coords, 'o-', label='Dynamic eta')
     # plt.plot(x_coords[-1], y_coords[-1], 'x--', label='Fixed eta')
-    plt.scatter(x_coords[-1], y_coords[-1], color='blue', label='Dynamic Solution', zorder=5)
+    plt.scatter(x_coords[-1], y_coords[-1], color='orange', label='Dynamic Solution', zorder=5)
     # plt.scatter([expected_solution_fixed[0]], [expected_solution_fixed[1]], color='red', label='Fixed Solution', zorder=5)
     plt.xlabel('$x_1$')
     plt.ylabel('$x_2$')
